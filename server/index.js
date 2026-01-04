@@ -29,10 +29,17 @@ app.use("/api/pets", petRoutes);
 const chatRoutes = require("./routes/chatRoutes");
 app.use("/api/chat", chatRoutes);
 
+// 6. AI Routes (Generate Descriptions)
+const aiRoutes = require("./routes/aiRoutes");
+app.use("/api/ai", aiRoutes);
+
+
 // 5. Basic Health Check
 app.get("/", (req, res) => {
   res.send("Pet Adoption Backend is running 🚀");
 });
+
+
 
 // --- START SERVER ---
 // ✅ ALWAYS at the very bottom
