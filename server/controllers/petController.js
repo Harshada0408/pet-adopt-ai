@@ -34,4 +34,47 @@ const addPet = (req, res) => {
   );
 };
 
-module.exports = { addPet };
+// GET ALL PETS (PUBLIC)
+const getAllPets = (req, res) => {
+  const query = `
+    SELECT pets.*, users.name AS owner_name
+    FROM pets
+    JOIN users ON pets.owner_id = users.id
+    WHERE adopted = false
+    ORDER BY created_at DESC
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "Error fetching pets" });
+    }
+
+    res.status(200).json(results);
+  });
+};
+
+// GET SINGLE PET BY ID (PUBLIC)
+const getPetById = (req, res) => {
+  const petId = req.params.id;
+
+  const query = `
+    SELECT pets.*, users.name AS owner_name
+    FROM pets
+    JOIN users ON pets.owner_id = users.id
+    WHERE pets.id = ?
+  `;
+
+  db.query(query, [petId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "Error fetching pet" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Pet not found" });
+    }
+
+    res.status(200).json(results[0]);
+  });
+};
+
+module.exports = { addPet, getAllPets, getPetById };
