@@ -77,4 +77,43 @@ const getPetById = (req, res) => {
   });
 };
 
-module.exports = { addPet, getAllPets, getPetById };
+// MARK PET AS ADOPTED (OWNER ONLY)
+const markAsAdopted = (req, res) => {
+  const petId = req.params.id;
+  const userId = req.user.id;
+
+  // check ownership
+  const checkQuery = "SELECT * FROM pets WHERE id = ? AND owner_id = ?";
+
+  db.query(checkQuery, [petId, userId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    if (result.length === 0) {
+      return res.status(403).json({
+        message: "Not authorized to update this pet"
+      });
+    }
+
+    // update pet
+    const updateQuery = "UPDATE pets SET adopted = true WHERE id = ?";
+
+    db.query(updateQuery, [petId], (err) => {
+      if (err) {
+        return res.status(500).json({ message: "Error updating pet" });
+      }
+
+      res.status(200).json({
+        message: "Pet marked as adopted successfully"
+      });
+    });
+  });
+};
+
+module.exports = {
+  addPet,
+  getAllPets,
+  getPetById,
+  markAsAdopted
+};

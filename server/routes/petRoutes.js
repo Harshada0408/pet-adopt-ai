@@ -15,7 +15,8 @@ const protect = require("../middleware/authMiddleware");
 const {
   addPet,
   getAllPets,
-  getPetById
+  getPetById,
+  markAsAdopted
 } = require("../controllers/petController");
 
 // public routes
@@ -24,5 +25,7 @@ router.get("/:id", getPetById);
 
 // protected route
 router.post("/", protect, addPet);
+// mark pet as adopted (owner only)
+router.put("/:id/adopt", protect, markAsAdopted);
 
 module.exports = router;
