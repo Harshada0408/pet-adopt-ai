@@ -14,21 +14,20 @@ app.use(express.json());
 
 //authroutes
 const authRoutes = require("./routes/authRoutes");
-
 app.use("/api/auth", authRoutes);
 
 const testRoutes = require("./routes/testRoutes");
-
 app.use("/api/test", testRoutes);
-
-
 
 // test route
 app.get("/", (req, res) => {
   res.send("Pet Adoption Backend is running 🚀");
 });
-
+//petroutes
+const petRoutes = require("./routes/petRoutes");
+app.use("/api/pets", petRoutes);
 // start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
