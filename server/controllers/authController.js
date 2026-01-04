@@ -46,4 +46,51 @@ const registerUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser };
+const jwt = require("jsonwebtoken");
+
+// LOGIN USER
+const loginUser = (req, res) => {
+  const { email, password } = req.body;
+
+  // validation
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const query = "SELECT * FROM users WHERE email = ?";
+
+  db.query(query, [email], async (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    if (result.length === 0) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const user = result[0];
+
+    // compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // generate JWT
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      token
+    });
+  });
+};
+
+
+module.exports = { registerUser, loginUser };
+
