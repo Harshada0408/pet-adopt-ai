@@ -34,13 +34,28 @@
 
 // export default App
 
+// import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// function App() {
+//   return (
+//     <BrowserRouter>
+//       <Routes>
+//         <Route path="/" element={<h1>Pet Adoption Platform 🐾</h1>} />
+//       </Routes>
+//     </BrowserRouter>
+//   );
+// }
+
+// export default App;
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<h1>Pet Adoption Platform 🐾</h1>} />
+        <Route path="/" element={<Home />} />
       </Routes>
     </BrowserRouter>
   );
