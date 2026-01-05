@@ -3,15 +3,25 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AddPet from "./pages/AddPet";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
     <BrowserRouter>
+      <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/add-pet" element={<AddPet />} />
+        <Route
+          path="/add-pet"
+          element={
+            <ProtectedRoute>
+              <AddPet />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
