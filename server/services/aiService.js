@@ -1,4 +1,4 @@
-const axios = require("axios");
+// const axios = require("axios");
 
 // const generatePetDescription = async ({
 //   name,
@@ -45,33 +45,55 @@ const axios = require("axios");
 //   }
 // };
 
-const generatePetDescription = async ({ name, type, breed, age, reason }) => {
-  try {
-    const response = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: "You are a professional animal shelter copywriter. You write emotional, heart-touching, and persuasive adoption descriptions that help pets find homes. Use a warm and hopeful tone."
-        },
-        {
-          role: "user",
-          content: `Write a detailed 3-paragraph adoption description for a pet with these details:
-          - Name: ${name}
-          - Type: ${type}
-          - Breed: ${breed}
-          - Age: ${age} years old
-          - Reason for adoption: ${reason}
-          
-          Include a catchy title at the top, describe the pet's personality based on their breed, and explain why they need a new loving family. End with a call to action.`
-        }
-      ],
-      model: "llama3-8b-8192", // Using a high-quality model
-    });
+// module.exports = { generatePetDescription };
+const axios = require("axios");
 
-    return response.choices[0].message.content;
+const generatePetDescription = async ({ name, type, breed, age, reason }) => {
+  // 1. Better Prompt for more detail
+  const prompt = `
+    You are a professional animal shelter storyteller. 
+    Write a heartwarming, detailed, and persuasive adoption story for a pet.
+    
+    Pet Details:
+    - Name: ${name}
+    - Type: ${type}
+    - Breed: ${breed || "a wonderful mix"}
+    - Age: ${age || "Unknown"} years old
+    - Reason for needing a home: ${reason}
+
+    Instructions:
+    - Start with a catchy, emotional title.
+    - Write 3 short, engaging paragraphs.
+    - Focus on the pet's personality and the love they have to give.
+    - End with a hopeful call to action.
+    - Tone: Compassionate and professional.
+  `;
+
+  try {
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.8 // Slightly higher for more creative writing
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    return response.data.choices[0].message.content;
   } catch (error) {
-    console.error("Groq AI Error:", error);
-    throw new Error("Failed to generate description");
+    // 2. Improved error logging
+    console.error("Groq AI error:", error.response?.data || error.message);
+    
+    // Throwing the error so the Controller knows it failed, 
+    // instead of sending a short sentence you don't like.
+    throw new Error("AI Generation failed");
   }
 };
+
 module.exports = { generatePetDescription };

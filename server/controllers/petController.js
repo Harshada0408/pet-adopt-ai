@@ -1,38 +1,108 @@
 const db = require("../config/db");
 
-// ADD PET
-const addPet = (req, res) => {
-  const { name, type, breed, age, description, location } = req.body;
+// // ADD PET
+// const addPet = (req, res) => {
+//   const { name, type, breed, age, description, location } = req.body;
 
-  // basic validation
+//   // basic validation
+//   if (!name || !type) {
+//     return res.status(400).json({ message: "Pet name and type are required" });
+//   }
+
+//   // owner_id comes from JWT
+//   const ownerId = req.user.id;
+
+//   const query = `
+//     INSERT INTO pets 
+//     (owner_id, name, type, breed, age, description, location)
+//     VALUES (?, ?, ?, ?, ?, ?, ?)
+//   `;
+
+//   db.query(
+//     query,
+//     [ownerId, name, type, breed, age, description, location],
+//     (err, result) => {
+//       if (err) {
+//         return res.status(500).json({ message: "Error adding pet" });
+//       }
+
+//       res.status(201).json({
+//         message: "Pet listed successfully",
+//         petId: result.insertId
+//       });
+//     }
+//   );
+// };
+
+const { generatePetDescription } = require("../services/aiService");
+
+// ADD PET (WITH OPTIONAL AI DESCRIPTION)
+const addPet = async (req, res) => {
+  const {
+    name,
+    type,
+    breed,
+    age,
+    description,
+    location,
+    useAI,
+    reason
+  } = req.body;
+
   if (!name || !type) {
-    return res.status(400).json({ message: "Pet name and type are required" });
+    return res.status(400).json({
+      message: "Pet name and type are required"
+    });
   }
 
-  // owner_id comes from JWT
   const ownerId = req.user.id;
 
+  let finalDescription = description;
+
+  // If user wants AI-generated description
+  if (useAI === true) {
+    finalDescription = await generatePetDescription({
+      name,
+      type,
+      breed,
+      age,
+      reason
+    });
+  }
+
   const query = `
-    INSERT INTO pets 
+    INSERT INTO pets
     (owner_id, name, type, breed, age, description, location)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(
     query,
-    [ownerId, name, type, breed, age, description, location],
+    [
+      ownerId,
+      name,
+      type,
+      breed,
+      age,
+      finalDescription,
+      location
+    ],
     (err, result) => {
       if (err) {
-        return res.status(500).json({ message: "Error adding pet" });
+        return res.status(500).json({
+          message: "Error adding pet"
+        });
       }
 
       res.status(201).json({
         message: "Pet listed successfully",
-        petId: result.insertId
+        petId: result.insertId,
+        aiUsed: useAI === true
       });
     }
   );
 };
+
 
 // GET ALL PETS (PUBLIC)
 const getAllPets = (req, res) => {
